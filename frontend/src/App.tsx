@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { Scanner } from "@yudiel/react-qr-scanner";
 import "./App.css";
 
 type TagEvent = {
@@ -44,6 +45,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showScanner, setShowScanner] = useState(false);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -175,7 +177,8 @@ const App: React.FC = () => {
               <span></span>
               Dashboard
             </button>
-           { /*} <button className="nav-item">
+            {/* 
+            <button className="nav-item">
               <span></span>
               Tags
             </button>
@@ -186,7 +189,8 @@ const App: React.FC = () => {
             <button className="nav-item">
               <span></span>
               Devices
-            </button>*/}
+            </button>
+            */}
           </nav>
 
           <div className="sidebar-footer">
@@ -233,11 +237,61 @@ const App: React.FC = () => {
               <form className="form-grid" onSubmit={handleSubmit}>
                 <label className="field">
                   <span>Tag ID</span>
-                  <input
-                    placeholder="e.g. NFC-101, device-01"
-                    value={tagId}
-                    onChange={(e) => setTagId(e.target.value)}
-                  />
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "0.5rem",
+                      alignItems: "center",
+                    }}
+                  >
+                    <input
+                      placeholder="e.g. NFC-101, device-01"
+                      value={tagId}
+                      onChange={(e) => setTagId(e.target.value)}
+                      style={{ flex: 1 }}
+                    />
+                    <button
+                      type="button"
+                      className="btn-ghost"
+                      onClick={() => setShowScanner((prev) => !prev)}
+                      style={{ whiteSpace: "nowrap" }}
+                    >
+                      {showScanner ? "Close scanner" : "Scan QR"}
+                    </button>
+                  </div>
+
+                {showScanner && (
+  <div
+    style={{
+      marginTop: "0.6rem",
+      borderRadius: 16,
+      overflow: "hidden",
+      border: "1px solid rgba(148, 163, 184, 0.45)",
+      background: "rgba(15, 23, 42, 0.9)",
+    }}
+  >
+    <Scanner
+      onScan={(result) => {
+        if (result && Array.isArray(result) && result.length > 0) {
+          const value = result[0].rawValue;
+          setTagId(value);
+          setShowScanner(false);
+        }
+      }}
+      onError={(error: unknown) => {
+        console.error(error);
+      }}
+      constraints={{
+        facingMode: "environment",
+      }}
+      styles={{
+        container: { width: "100%" },
+        video: { width: "100%" },
+      }}
+    />
+  </div>
+)}
+
                 </label>
 
                 <label className="field">
@@ -416,7 +470,7 @@ const App: React.FC = () => {
           </section>
 
           <footer className="app-footer">
-            <span>· Simulated IoT / NFC event tracker</span>
+            <span>· Simulated IoT / NFC / QR event tracker</span>
           </footer>
         </main>
       </div>
